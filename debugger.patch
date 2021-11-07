@@ -2,7 +2,7 @@
 # User xetera
 # Date 1636312520 -10800
 #      Sun Nov 07 22:15:20 2021 +0300
-# Node ID 2c357242a26126350a3fa89c5c1645204a7b2df4
+# Node ID 19a8718c268763b3af261be8f32fff4ee6d9fdfa
 # Parent  b5cd80ed00eadc7a1ebfa2847e9f72abcbc1e820
 Mapping debugger to an empty statement
 
@@ -23,20 +23,31 @@ diff --git a/js/src/frontend/Parser.cpp b/js/src/frontend/Parser.cpp
  
      // |function| is forbidden by lookahead restriction (unless as child
      // statement of |if| or |else|, but Parser::consequentOrAlternative
-@@ -9163,9 +9167,12 @@ GeneralParser<ParseHandler, Unit>::state
-     case TokenKind::Try:
+@@ -9164,8 +9168,12 @@ GeneralParser<ParseHandler, Unit>::state
        return tryStatement(yieldHandling);
  
+     // DebuggerStatement
 +    case TokenKind::XDebugger:
 +      return debuggerStatement();
 +
-     // DebuggerStatement
++    // Fake Debugger statement
      case TokenKind::Debugger:
 -      return debuggerStatement();
 +      return breakStatement(yieldHandling);
  
      // Declaration[Yield]:
  
+diff --git a/js/src/frontend/ReservedWords.h b/js/src/frontend/ReservedWords.h
+--- a/js/src/frontend/ReservedWords.h
++++ b/js/src/frontend/ReservedWords.h
+@@ -21,6 +21,7 @@
+   MACRO(const, const_, TokenKind::Const)                \
+   MACRO(continue, continue_, TokenKind::Continue)       \
+   MACRO(debugger, debugger, TokenKind::Debugger)        \
++  MACRO(xdebugger, xdebugger, TokenKind::XDebugger)     \
+   MACRO(default, default_, TokenKind::Default)          \
+   MACRO(delete, delete_, TokenKind::Delete)             \
+   MACRO(do, do_, TokenKind::Do)                         \
 diff --git a/js/src/frontend/TokenKind.h b/js/src/frontend/TokenKind.h
 --- a/js/src/frontend/TokenKind.h
 +++ b/js/src/frontend/TokenKind.h
@@ -55,7 +66,7 @@ diff --git a/js/src/vm/CommonPropertyNames.h b/js/src/vm/CommonPropertyNames.h
    MACRO_(day, day, "day")                                                      \
    MACRO_(dayPeriod, dayPeriod, "dayPeriod")                                    \
    MACRO_(debugger, debugger, "debugger")                                       \
-+  MACRO_(xdebugger, debugger, "xdebugger")                                     \
++  MACRO_(xdebugger, xdebugger, "xdebugger")                                    \
    MACRO_(decimal, decimal, "decimal")                                          \
    MACRO_(decodeURI, decodeURI, "decodeURI")                                    \
    MACRO_(decodeURIComponent, decodeURIComponent, "decodeURIComponent")         \
