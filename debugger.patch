@@ -1,0 +1,61 @@
+# HG changeset patch
+# User xetera
+# Date 1636312520 -10800
+#      Sun Nov 07 22:15:20 2021 +0300
+# Node ID 2c357242a26126350a3fa89c5c1645204a7b2df4
+# Parent  b5cd80ed00eadc7a1ebfa2847e9f72abcbc1e820
+Mapping debugger to an empty statement
+
+diff --git a/js/src/frontend/Parser.cpp b/js/src/frontend/Parser.cpp
+--- a/js/src/frontend/Parser.cpp
++++ b/js/src/frontend/Parser.cpp
+@@ -8955,8 +8955,12 @@ typename ParseHandler::Node GeneralParse
+       return tryStatement(yieldHandling);
+ 
+     // DebuggerStatement
++    case TokenKind::XDebugger:
++      return debuggerStatement();
++
++    // Fake Debugger statement
+     case TokenKind::Debugger:
+-      return debuggerStatement();
++      return breakStatement(yieldHandling);
+ 
+     // |function| is forbidden by lookahead restriction (unless as child
+     // statement of |if| or |else|, but Parser::consequentOrAlternative
+@@ -9163,9 +9167,12 @@ GeneralParser<ParseHandler, Unit>::state
+     case TokenKind::Try:
+       return tryStatement(yieldHandling);
+ 
++    case TokenKind::XDebugger:
++      return debuggerStatement();
++
+     // DebuggerStatement
+     case TokenKind::Debugger:
+-      return debuggerStatement();
++      return breakStatement(yieldHandling);
+ 
+     // Declaration[Yield]:
+ 
+diff --git a/js/src/frontend/TokenKind.h b/js/src/frontend/TokenKind.h
+--- a/js/src/frontend/TokenKind.h
++++ b/js/src/frontend/TokenKind.h
+@@ -114,6 +114,7 @@
+   MACRO(Finally, "keyword 'finally'")                                  \
+   MACRO(Throw, "keyword 'throw'")                                      \
+   MACRO(Debugger, "keyword 'debugger'")                                \
++  MACRO(XDebugger, "keyword 'xdebugger'")                              \
+   MACRO(Export, "keyword 'export'")                                    \
+   MACRO(Import, "keyword 'import'")                                    \
+   MACRO(Class, "keyword 'class'")                                      \
+diff --git a/js/src/vm/CommonPropertyNames.h b/js/src/vm/CommonPropertyNames.h
+--- a/js/src/vm/CommonPropertyNames.h
++++ b/js/src/vm/CommonPropertyNames.h
+@@ -110,6 +110,7 @@
+   MACRO_(day, day, "day")                                                      \
+   MACRO_(dayPeriod, dayPeriod, "dayPeriod")                                    \
+   MACRO_(debugger, debugger, "debugger")                                       \
++  MACRO_(xdebugger, debugger, "xdebugger")                                     \
+   MACRO_(decimal, decimal, "decimal")                                          \
+   MACRO_(decodeURI, decodeURI, "decodeURI")                                    \
+   MACRO_(decodeURIComponent, decodeURIComponent, "decodeURIComponent")         \
